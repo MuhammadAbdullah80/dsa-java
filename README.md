@@ -10,6 +10,11 @@ implementation, not reaching for `java.util`.
 |-------|-----------|
 | `LRUCache<K,V>` | O(1) `get` / `put`, fixed capacity, evicts least-recently-used |
 | `UnionFind` | Near-O(1) amortised `find` / `union` via path compression + union by rank |
+| `Trie` | O(k) `insert` / `contains` / `startsWith` for a key of length k |
+| `MinHeap<T>` | O(log n) `push` / `pop`, O(1) `peek`, O(n) heapify |
+
+None of these are thread-safe. Every one of them mutates on read or write
+paths that look like accessors, so concurrent use corrupts them.
 
 `LRUCache` keeps entries in a `HashMap` for lookup and in an intrusive doubly
 linked list for recency, with sentinel head/tail nodes so unlinking never needs
