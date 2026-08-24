@@ -1,5 +1,9 @@
 package dsa;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.NoSuchElementException;
+
 /**
  * Small self-checking harness so the repo runs with a plain JDK and no build
  * tool: {@code javac} the sources and {@code java dsa.Main}. Any failure exits
@@ -18,6 +22,10 @@ public final class Main {
         lruRejectsBadCapacity();
         unionFindMergesAndCounts();
         unionFindRejectsOutOfRange();
+        heapPopsInAscendingOrder();
+        heapifyIsOrderIndependent();
+        heapHonoursACustomComparator();
+        heapRejectsPopOnEmpty();
 
         if (failures > 0) {
             System.out.println(failures + " check(s) failed");
@@ -72,6 +80,42 @@ public final class Main {
             check("bounds checked", false);
         } catch (IndexOutOfBoundsException expected) {
             check("bounds checked", true);
+        }
+    }
+
+    private static void heapPopsInAscendingOrder() {
+        MinHeap<Integer> heap = new MinHeap<>();
+        for (int value : new int[] {5, 3, 8, 1, 9, 2}) {
+            heap.push(value);
+        }
+        check("peek is the minimum", heap.peek() == 1);
+        StringBuilder order = new StringBuilder();
+        while (!heap.isEmpty()) {
+            order.append(heap.pop()).append(' ');
+        }
+        check("pops ascending", order.toString().trim().equals("1 2 3 5 8 9"));
+    }
+
+    private static void heapifyIsOrderIndependent() {
+        MinHeap<Integer> heap = new MinHeap<>(Arrays.asList(9, 7, 5, 3, 1), Comparator.naturalOrder());
+        check("heapify finds the minimum", heap.peek() == 1);
+        check("heapify keeps every element", heap.size() == 5);
+    }
+
+    private static void heapHonoursACustomComparator() {
+        MinHeap<String> heap = new MinHeap<>(Comparator.comparingInt(String::length));
+        heap.push("three");
+        heap.push("a");
+        heap.push("four");
+        check("shortest first", heap.pop().equals("a"));
+    }
+
+    private static void heapRejectsPopOnEmpty() {
+        try {
+            new MinHeap<Integer>().pop();
+            check("empty pop throws", false);
+        } catch (NoSuchElementException expected) {
+            check("empty pop throws", true);
         }
     }
 
