@@ -116,6 +116,9 @@ public final class Main {
             check("rejects empty word", false);
         } catch (IllegalArgumentException expected) {
             check("rejects empty word", true);
+        }
+    }
+
     private static void heapPopsInAscendingOrder() {
         MinHeap<Integer> heap = new MinHeap<>();
         for (int value : new int[] {5, 3, 8, 1, 9, 2}) {
