@@ -9,6 +9,16 @@ import java.util.Map;
  * <p>Entries live in a HashMap for lookup and simultaneously in an intrusive
  * doubly linked list ordered most- to least-recently used. Sentinel head and
  * tail nodes remove the null checks that otherwise clutter every unlink.
+ *
+ * <p><strong>Not thread-safe.</strong> Every operation mutates the recency
+ * list, {@code get} included, so concurrent access will corrupt it. Callers
+ * needing safety should wrap instances in their own synchronisation; note that
+ * {@code Collections.synchronizedMap} is not applicable here because this class
+ * does not implement {@code Map}.
+ *
+ * <p><strong>Null values are not distinguishable from absence.</strong>
+ * {@link #get} returns {@code null} both for a missing key and for a key stored
+ * with a null value. Use {@link #containsKey} when that difference matters.
  */
 public class LRUCache<K, V> {
 
@@ -44,7 +54,12 @@ public class LRUCache<K, V> {
         tail.prev = head;
     }
 
-    /** Returns the cached value, or {@code null} if absent, marking it most-recent. */
+    /**
+     * Returns the cached value, or {@code null} if absent, marking it most-recent.
+     *
+     * <p>This mutates the recency list, so it is not safe to call concurrently
+     * even though it reads like an accessor.
+     */
     public V get(K key) {
         Node<K, V> node = index.get(key);
         if (node == null) {
