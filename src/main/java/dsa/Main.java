@@ -1,5 +1,7 @@
 package dsa;
 
+import java.util.List;
+
 /**
  * Small self-checking harness so the repo runs with a plain JDK and no build
  * tool: {@code javac} the sources and {@code java dsa.Main}. Any failure exits
@@ -18,6 +20,9 @@ public final class Main {
         lruRejectsBadCapacity();
         unionFindMergesAndCounts();
         unionFindRejectsOutOfRange();
+        trieDistinguishesWordsFromPrefixes();
+        trieCollectsByPrefix();
+        trieRejectsEmptyInput();
 
         if (failures > 0) {
             System.out.println(failures + " check(s) failed");
@@ -72,6 +77,38 @@ public final class Main {
             check("bounds checked", false);
         } catch (IndexOutOfBoundsException expected) {
             check("bounds checked", true);
+        }
+    }
+
+    private static void trieDistinguishesWordsFromPrefixes() {
+        Trie trie = new Trie();
+        trie.insert("carpet");
+        check("exact word found", trie.contains("carpet"));
+        check("bare prefix is not a word", !trie.contains("car"));
+        check("prefix is recognised", trie.startsWith("car"));
+        check("absent prefix rejected", !trie.startsWith("dog"));
+        check("duplicate insert reported", !trie.insert("carpet"));
+        check("size counts distinct words", trie.size() == 1);
+    }
+
+    private static void trieCollectsByPrefix() {
+        Trie trie = new Trie();
+        trie.insert("car");
+        trie.insert("carpet");
+        trie.insert("cart");
+        trie.insert("dog");
+        List<String> found = trie.keysWithPrefix("car");
+        check("prefix collects every match", found.size() == 3);
+        check("prefix excludes non-matches", !found.contains("dog"));
+        check("prefix includes the prefix itself", found.contains("car"));
+    }
+
+    private static void trieRejectsEmptyInput() {
+        try {
+            new Trie().insert("");
+            check("rejects empty word", false);
+        } catch (IllegalArgumentException expected) {
+            check("rejects empty word", true);
         }
     }
 
